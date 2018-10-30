@@ -1,0 +1,409 @@
+<div>
+  <form [formGroup]="suspectReportForm" (ngSubmit)="onSubmit()">
+    <mat-card>
+      <mat-card-title>
+          Initial CLASS A Disease Suspect Report
+      </mat-card-title>
+      <mat-card-content>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="70" fxFlex.xs="30">
+            <mat-form-field>
+              <input matInput [matDatepicker]="picker" placeholder="Date" formControlName="date">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              <mat-error *ngIf="date.invalid && (date.dirty || date.touched)">
+                <mat-error *ngIf="date.errors.required">Date is required</mat-error>
+            </mat-error>
+            </mat-form-field>
+          </div>
+          <div fxFlex="30">               
+            <mat-form-field>
+              <input matInput type="time" placeholder="Time" formControlName="time">
+              <mat-error *ngIf="time.invalid && (time.dirty || time.touched)">
+                <mat-error *ngIf="time.errors.required">Time is required</mat-error>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>   
+      </mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-title>
+          Details of Suspect Premises
+      </mat-card-title>
+      <mat-card-content>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="30" fxFlex.xs="30">
+            <mat-form-field>
+              <mat-select placeholder="Premises Type" formControlName="premisesType" (selectionChange) ="enablePremiseFields()">
+                <mat-option *ngFor="let premisesType of premisesTypeList" [value]="premisesType.code">
+                  {{premisesType.description}}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="premisesType.invalid && (premisesType.dirty || premisesType.touched)">
+                <mat-error *ngIf="premisesType.errors.required">Premise Type is required</mat-error>
+            </mat-error>
+            </mat-form-field>
+          </div>
+          <div fxFlex="15"> 
+            <mat-checkbox formControlName="premisesPigsOnSite">Pigs on Site?</mat-checkbox>
+          </div>
+          <div fxFlex="15"> 
+            <mat-checkbox formControlName="premisesDealer">Dealer?</mat-checkbox>
+          </div>
+          <div fxFlex="15"> 
+            <mat-checkbox formControlName="premisesDairyFarm">Dairy Farm?</mat-checkbox>
+          </div>
+          <div fxFlex="30"> 
+            <mat-form-field>
+              <input matInput formControlName="premisesHerdType" placeholder="Herd Type">
+            </mat-form-field>
+          </div>
+        </div>   
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="20" fxFlex.xs="20">
+            <mat-form-field>
+              <input matInput formControlName="premisesBusinessIdentifier" placeholder="Business Identifier">
+            </mat-form-field>
+          </div>
+          <div fxFlex="10"> 
+            <button type="button" mat-raised-button color="primary" (click)="searchClicked()" [disabled]="isPremiseNotSelected">Search</button>
+          </div>
+          <div fxFlex="10"> 
+            <button type="button" mat-raised-button color="primary" (click)="addClicked()" [disabled]="isPremiseNotSelected">Add</button>
+          </div>
+          <div fxFlex="10"> 
+            <span>DED</span>{{ded}}	
+          </div>
+          <div fxFlex="50"> 
+            <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+              <ng-container matColumnDef="herdNo">
+                <th mat-header-cell *matHeaderCellDef> Herd Number </th>
+                <td mat-cell *matCellDef="let element"> {{element.herdNo}} </td>
+              </ng-container>
+              <ng-container matColumnDef="species">
+                <th mat-header-cell *matHeaderCellDef> Species </th>
+                <td mat-cell *matCellDef="let element"> {{element.species}} </td>
+              </ng-container>
+              <ng-container matColumnDef="noOfAnimals">
+                <th mat-header-cell *matHeaderCellDef> No of Animals </th>
+                <td mat-cell *matCellDef="let element"> {{element.noOfAnimals}} </td>
+              </ng-container>
+              <ng-container matColumnDef="keeperName">
+                <th mat-header-cell *matHeaderCellDef> Keeper Name </th>
+                <td mat-cell *matCellDef="let element"> {{element.keeperName}} </td>
+              </ng-container>
+              <ng-container matColumnDef="activityStatus">
+                <th mat-header-cell *matHeaderCellDef> Activity Status </th>
+                <td mat-cell *matCellDef="let element"> {{element.activityStatus}} </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+        </div> 
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="30" fxFlex.xs="20">
+            <span>Name</span> {{busCust?.custForeName}} {{busCust?.custSurName}}
+          </div>
+          <!-- busCust -->
+          <div fxFlex="20">
+            <span>Phone</span>{{premisesPhone}}	
+          </div>
+        </div>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="30" fxFlex.xs="20">
+            <span>Address</span>
+            {{busCust?.address1}}<br>
+            {{busCust?.address2}}<br>
+            {{busCust?.address3}}<br>
+            {{busCust?.address4}}	
+          </div>
+          <div fxFlex="20">
+            <mat-form-field>
+              <textarea matInput formControlName="premisesComments" placeholder="Comment"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-title>
+          Details of Index Herd (If different to suspect premises above)
+      </mat-card-title>
+      <mat-card-content>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="30" fxFlex.xs="30">
+            <mat-form-field>
+              <mat-select placeholder="Index Herd Type" formControlName="indexHerdType" (selectionChange) ="enableIndexHerdTypeFields()">
+                <mat-option *ngFor="let indexHerdType of indexHerdTypeList" [value]="indexHerdType.code">
+                  {{indexType.description}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div fxFlex="15"> 
+            <mat-checkbox formControlName="indexPigsOnSite">Pigs on Site?</mat-checkbox>
+          </div>
+          <div fxFlex="15"> 
+            <mat-checkbox formControlName="indexDealer">Dealer?</mat-checkbox>
+          </div>
+          <div fxFlex="15"> 
+            <mat-checkbox formControlName="indexDairyFarm">Dairy Farm?</mat-checkbox>
+          </div>
+          <div fxFlex="30"> 
+            <mat-form-field>
+              <input matInput formControlName="indexHerdType" placeholder="Herd Type">
+            </mat-form-field>
+          </div>
+        </div>   
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="20" fxFlex.xs="20">
+            <mat-form-field>
+              <input matInput formControlName="indexHerdNumber" placeholder="Index Herd">
+            </mat-form-field>
+          </div>
+          <div fxFlex="10"> 
+            <button type="button" mat-raised-button color="primary" (click)="searchClicked()" [disabled]="isIndexHerdNotSelected">Search</button>
+          </div>
+          <div fxFlex="10"> 
+            <button type="button" mat-raised-button color="primary" (click)="addClicked()" [disabled]="isIndexHerdNotSelected">Add</button>
+          </div>
+          <div fxFlex="10"> 
+            <span>DED</span>{{ded}}	
+          </div>
+          <div fxFlex="50"> 
+            <table mat-table [dataSource]="" class="mat-elevation-z8">
+              <ng-container matColumnDef="herdNo">
+                <th mat-header-cell *matHeaderCellDef> Herd Number </th>
+                <td mat-cell *matCellDef="let element"> {{element.herdNo}} </td>
+              </ng-container>
+              <ng-container matColumnDef="species">
+                <th mat-header-cell *matHeaderCellDef> Species </th>
+                <td mat-cell *matCellDef="let element"> {{element.species}} </td>
+              </ng-container>
+              <ng-container matColumnDef="noOfAnimals">
+                <th mat-header-cell *matHeaderCellDef> No of Animals </th>
+                <td mat-cell *matCellDef="let element"> {{element.noOfAnimals}} </td>
+              </ng-container>
+              <ng-container matColumnDef="keeperName">
+                <th mat-header-cell *matHeaderCellDef> Keeper Name </th>
+                <td mat-cell *matCellDef="let element"> {{element.keeperName}} </td>
+              </ng-container>
+              <ng-container matColumnDef="activityStatus">
+                <th mat-header-cell *matHeaderCellDef> Activity Status </th>
+                <td mat-cell *matCellDef="let element"> {{element.activityStatus}} </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+        </div> 
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="30" fxFlex.xs="20">
+            <span>Name</span>{{name}}	
+          </div>
+          <div fxFlex="20">
+            <span>Phone</span>{{phone}}	
+          </div>
+        </div>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="30" fxFlex.xs="20">
+            <span>Address</span>{{address}}	
+          </div>
+          <div fxFlex="20">
+            <mat-form-field>
+              <textarea matInput formControlName="indexComments" placeholder="Comment"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-title>
+          Details of person making report
+      </mat-card-title>
+      <mat-card-content>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="40" fxFlex.xs="30">
+            <mat-form-field>
+              <mat-select placeholder="Reported By" formControlName="reportedBy" (selectionChange) ="enableReportedBy()">
+                <mat-option *ngFor="let reportedBy of reportedByList" [value]="reportedBy.code">
+                  {{reportedBy.description}}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="reportedBy.invalid && (reportedBy.dirty || reportedBy.touched)">
+                <mat-error *ngIf="reportedBy.errors.required">Reported By is required</mat-error>
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div fxFlex="30" fxFlex.xs="30">
+            <mat-form-field>
+              <mat-select placeholder="Report Type" formControlName="reporterType" (selectionChange) ="changeReportType()">
+                <mat-option *ngFor="let report of reportTypes" [value]="report.code">
+                  {{report.description}}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="reporterType.invalid && (reporterType.dirty || reporterType.touched)">
+                <mat-error *ngIf="reporterType.errors.required">Report Type is required</mat-error>
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div fxFlex="30"> 
+            <mat-form-field>
+              <input matInput type="number" formControlName="reporterTelNo" placeholder="Phone No">
+              <mat-error *ngIf="reporterTelNo.invalid && (reporterTelNo.dirty || reporterTelNo.touched)">
+                <mat-error *ngIf="reporterTelNo.errors.required">Phone No is required</mat-error>
+                <mat-error *ngIf="reporterTelNo.errors.maxlength">Phone No cannot be more than 20 characters</mat-error>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="20">
+            <mat-form-field>
+              <input matInput formControlName="reporterCcs" placeholder="CCS Identifier">
+            </mat-form-field>
+          </div>
+          <div fxFlex="20"> 
+            <button type="button" mat-raised-button color="primary" (click)="searchClicked()" [disabled]="reportedByNotSelected">Search</button>
+          </div>
+          <div fxFlex="20">
+            <mat-form-field>
+              <input matInput formControlName="reporterName" placeholder="Name">
+              <mat-error *ngIf="reporterName.invalid && (reporterName.dirty || reporterName.touched)">
+                <mat-error *ngIf="reporterName.errors.required">Name is required</mat-error>
+                <mat-error *ngIf="reporterName.errors.maxlength">Name cannot be more than 70 characters</mat-error>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="25">
+            <mat-form-field>
+              <input matInput formControlName="reporterAddr1" placeholder="Address 1">
+              <mat-error *ngIf="reporterAddr1.invalid && (reporterAddr1.dirty || reporterAddr1.touched)">
+                <mat-error *ngIf="reporterAddr1.errors.required">Address line 1 is required</mat-error>
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div fxFlex="25">
+            <mat-form-field>
+              <input matInput formControlName="reporterAddr2" placeholder="Address 2">
+            </mat-form-field>
+          </div>
+          <div fxFlex="25">
+            <mat-form-field>
+              <input matInput formControlName="reporterAddr3" placeholder="Address 3">
+            </mat-form-field>
+          </div>
+          <div fxFlex="25">
+            <mat-form-field>
+              <input matInput formControlName="reporterAddr4" placeholder="Address 4">
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-title>
+          Suspected Disease
+      </mat-card-title>
+      <mat-card-content>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="40" fxFlex.xs="30">
+            <span>Suspect Disease</span>FMD
+          </div>
+        </div>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="40">
+            <mat-form-field>
+              <mat-select placeholder="Species Affected" formControlName="selectedSpecies" [compareWith]="compareFn" multiple>
+                <mat-option *ngFor="let species of speciesList$ | async;" [value]="species">{{species.speciesName}}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="selectedSpecies.invalid && (selectedSpecies.dirty || selectedSpecies.touched)">
+                <mat-error *ngIf="selectedSpecies.errors.required">Please select one or more species</mat-error>
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div fxFlex="20">
+            <mat-form-field>
+              <input matInput type="number" formControlName="noAnimalAffected" min=0 placeholder="No. Animals Affected">
+              <mat-error *ngIf="noAnimalAffected.invalid && (noAnimalAffected.dirty || noAnimalAffected.touched)">-->
+                <mat-error *ngIf="noAnimalAffected.errors.required">No animals affected is required</mat-error>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="40">
+            <mat-form-field>
+              <mat-select placeholder="Clinical Signs" formControlName="selectedClinicalSigns" [compareWith]="compareFn" multiple>
+                <mat-option *ngFor="let sign of clinicalSignsList$ | async;" [value]="sign">{{sign.description}}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="selectedClinicalSigns.invalid && (selectedClinicalSigns.dirty || selectedClinicalSigns.touched)">
+                <mat-error *ngIf="selectedClinicalSigns.errors.required">Please select one or more clinical signs</mat-error>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="40">
+            <mat-form-field>
+              <mat-select placeholder="Lesions" formControlName="selectedLesions" [compareWith]="compareFn" multiple>
+                <mat-option *ngFor="let lesion of lesionsList$ | async;" [value]="lesion">{{lesion.description}}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="selectedLesions.invalid && (selectedLesions.dirty || selectedLesions.touched)">
+                <mat-error *ngIf="selectedLesions.errors.required">Please select one or more lesions</mat-error>
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div fxFlex="20">
+            <mat-form-field>
+              <textarea matInput formControlName="diseaseHistory" placeholder="History"></textarea>
+            </mat-form-field>
+          </div>
+          <div fxFlex="20">
+            <mat-form-field>
+              <textarea matInput formControlName="diseaseComments" placeholder="Comment"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-title>
+        Confirmation of Personnel Notified
+      </mat-card-title>
+      <mat-card-content>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="30">
+            <mat-form-field>
+              <input matInput formControlName="ndccPerson" placeholder="NDCC Person Notified">
+            </mat-form-field>
+          </div>
+          <div fxFlex="30">
+            <mat-form-field>
+              <input matInput formControlName="sviPerson" placeholder="DVO SVI Person Notified">
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="content" fxLayout="row" fxLayout.xs="column">
+          <div fxFlex="30">
+            <mat-form-field>
+              <input matInput formControlName="ssviPerson" placeholder="Regional SSVI Person Notified">
+            </mat-form-field>
+          </div>
+          <div fxFlex="30">
+            <mat-form-field>
+              <input matInput formControlName="rvlPerson" placeholder="CVRL/RVL Person Notified">
+            </mat-form-field>
+          </div>
+        </div>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!suspectReportForm.valid">Submit</button>
+      </mat-card-content>
+    </mat-card>
+  </form>
+</div>

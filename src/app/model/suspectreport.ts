@@ -1,0 +1,35 @@
+import {Species} from '../model/species';
+export class SuspectReport {
+    id: number;
+    date: Date;
+    time: String;
+    premisesType: String;
+    premisesBusinessIdentifier: String;
+    diseaseComments: String;
+    diseaseHistory: String;
+    premisesComments: String;
+    indexComments: String;
+    ndccPerson: String;
+    rvlPerson: String;
+    ssviPerson: String;
+    sviPerson: String;
+    reporterTelNo: number;
+    noAnimalAffected: number;
+    reporterName: String;
+    reporterAddr1: String;
+    reporterAddr2: String;
+    reporterAddr3: String;
+    reporterAddr4: String;
+    premisesDairyFarm: Boolean;
+    premisesDealer: Boolean;
+    premisesPigsOnSite: Boolean;
+    indexPigsOnSite: Boolean;
+    indexDairyFarm: Boolean;
+    indexDealer: Boolean;
+    premisesHerdType: String;
+    indexHerdNumber: String;
+    indexHerdType: String;
+    selectedSpecies: Array<Species>;
+    reportedBy: String;
+    reporterCcs: String;
+}
